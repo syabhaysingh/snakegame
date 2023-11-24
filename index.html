@@ -65,12 +65,14 @@
 </head>
 <body>
   <button id="startButton">Start Game</button>
+  <button id="restartButton" style="display: none;" onclick="restartGame()">Restart Game</button>
   <div id="score">Score: 0</div>
   <div id="game-board"></div>
 
   <script>
     const board = document.getElementById('game-board');
     const scoreDisplay = document.getElementById('score');
+    const restartButton = document.getElementById('restartButton');
     const gridSize = 20;
     let snake = [{ x: 5, y: 5 }];
     let food = { x: 10, y: 10 };
@@ -142,6 +144,11 @@
         // Remove the tail if the snake didn't eat the food
         snake.pop();
       }
+
+      // Check for collision with walls or itself
+      if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize || checkCollision()) {
+        endGame();
+      }
     }
 
     function generateFood() {
@@ -151,6 +158,11 @@
       };
 
       return newFood;
+    }
+
+    function checkCollision() {
+      // Check if the head collides with the body
+      return snake.slice(1).some(segment => segment.x === snake[0].x && segment.y === snake[0].y);
     }
 
     function handleKeyPress(event) {
@@ -186,18 +198,38 @@
       }, 1000);
     }
 
+    function endGame() {
+      gameRunning = false;
+      restartButton.style.display = 'block';
+      clearInterval(gameInterval);
+    }
+
+    function restartGame() {
+      snake = [{ x: 5, y: 5 }];
+      food = generateFood();
+      direction = 'right';
+      gameRunning = true;
+      score = 0;
+      scoreDisplay.textContent = `Score: ${score}`;
+      restartButton.style.display = 'none';
+      createBoard();
+      main();
+    }
+
+    let gameInterval;
+
     function main() {
       createBoard();
 
       document.getElementById('startButton').addEventListener('click', () => {
         if (!gameRunning) {
           gameRunning = true;
-          document.getElementById('startButton').style.display = 'none';
+          restartButton.style.display = 'none';
           drawSnake();
           drawFood();
           document.addEventListener('keydown', handleKeyPress);
 
-          setInterval(() => {
+          gameInterval = setInterval(() => {
             moveSnake();
             updateBoard();
           }, 200);
