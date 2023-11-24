@@ -182,6 +182,37 @@
       }
     }
 
+    function handleTouchStart(event) {
+      const touch = event.touches[0];
+      const startX = touch.clientX;
+      const startY = touch.clientY;
+
+      document.addEventListener('touchmove', function handleTouchMove(e) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal swipe
+          if (deltaX > 0) {
+            direction = 'right';
+          } else {
+            direction = 'left';
+          }
+        } else {
+          // Vertical swipe
+          if (deltaY > 0) {
+            direction = 'down';
+          } else {
+            direction = 'up';
+          }
+        }
+
+        // Remove the event listener after processing the swipe
+        document.removeEventListener('touchmove', handleTouchMove);
+      });
+    }
+
     function animateRainbow() {
       // Apply rainbow animation to the entire snake
       snake.forEach((segment, index) => {
@@ -228,6 +259,7 @@
           drawSnake();
           drawFood();
           document.addEventListener('keydown', handleKeyPress);
+          document.addEventListener('touchstart', handleTouchStart);
 
           gameInterval = setInterval(() => {
             moveSnake();
