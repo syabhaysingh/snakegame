@@ -53,6 +53,18 @@
       cursor: pointer;
     }
 
+    #game-over-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #333;
+      padding: 20px;
+      text-align: center;
+      z-index: 1;
+    }
+
     @keyframes rainbowAnimation {
       0% {
         background-color: red;
@@ -102,9 +114,18 @@
     Your browser does not support the audio element.
   </audio>
 
+  <!-- Game over popup -->
+  <div id="game-over-popup">
+    <p id="game-over-message"></p>
+    <button id="restartButton">Restart Game</button>
+  </div>
+
   <script>
     const board = document.getElementById('game-board');
     const scoreDisplay = document.getElementById('score');
+    const gameOverPopup = document.getElementById('game-over-popup');
+    const gameOverMessage = document.getElementById('game-over-message');
+    const restartButton = document.getElementById('restartButton');
     const gridSize = 20;
     let snake = [{ x: 5, y: 5 }];
     let food = { x: 10, y: 10 };
@@ -181,6 +202,11 @@
         // Remove the tail if the snake didn't eat the food
         snake.pop();
       }
+
+      // Check for collision with walls or itself
+      if (checkCollision()) {
+        endGame();
+      }
     }
 
     function generateFood() {
@@ -190,6 +216,24 @@
       };
 
       return newFood;
+    }
+
+    function checkCollision() {
+      const head = snake[0];
+
+      // Check for collision with walls
+      if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+        return true;
+      }
+
+      // Check for collision with itself
+      for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     function handleKeyPress(event) {
@@ -215,45 +259,31 @@
       const startX = touch.clientX;
       const startY = touch.clientY;
 
-      // Check if the touch event occurred on the startButton
-      const startButton = document.getElementById('startButton');
-      const buttonRect = startButton.getBoundingClientRect();
+      // Check if the touch is a swipe
+      document.addEventListener('touchmove', function handleTouchMove(e) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
 
-      if (
-        touch.clientX >= buttonRect.left &&
-        touch.clientX <= buttonRect.right &&
-        touch.clientY >= buttonRect.top &&
-        touch.clientY <= buttonRect.bottom
-      ) {
-        // If the touch event is on the button, prevent default behavior
-        event.preventDefault();
-      } else {
-        // Otherwise, handle the swipe
-        document.addEventListener('touchmove', function handleTouchMove(e) {
-          const touch = e.touches[0];
-          const deltaX = touch.clientX - startX;
-          const deltaY = touch.clientY - startY;
-
-          if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            // Horizontal swipe
-            if (deltaX > 0) {
-              direction = 'right';
-            } else {
-              direction = 'left';
-            }
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal swipe
+          if (deltaX > 0) {
+            direction = 'right';
           } else {
-            // Vertical swipe
-            if (deltaY > 0) {
-              direction = 'down';
-            } else {
-              direction = 'up';
-            }
+            direction = 'left';
           }
+        } else {
+          // Vertical swipe
+          if (deltaY > 0) {
+            direction = 'down';
+          } else {
+            direction = 'up';
+          }
+        }
 
-          // Remove the event listener after processing the swipe
-          document.removeEventListener('touchmove', handleTouchMove);
-        });
-      }
+        // Remove the event listener after processing the swipe
+        document.removeEventListener('touchmove', handleTouchMove);
+      });
     }
 
     function animateRainbow() {
@@ -277,21 +307,51 @@
       eatingSound.play();
     }
 
+    function endGame() {
+      // Stop the game
+      gameRunning = false;
+
+      // Display game over message
+      gameOverMessage.textContent = `Game Over! Your Score: ${score}`;
+      gameOverPopup.style.display = 'block';
+    }
+
+    function restartGame() {
+      // Reset variables
+      snake = [{ x: 5, y: 5 }];
+      food = { x: 10, y: 10 };
+      direction = 'right';
+      score = 0;
+
+      // Hide game over popup
+      gameOverPopup.style.display = 'none';
+
+      // Start a new game
+      gameRunning = true;
+      drawSnake();
+      drawFood();
+      scoreDisplay.textContent = `Score: ${score}`;
+
+      // Add event listeners
+      document.addEventListener('keydown', handleKeyPress);
+      document.addEventListener('touchstart', handleTouchStart);
+
+      // Start background music
+      backgroundMusic.play();
+    }
+
+    // Add event listener for restart button
+    restartButton.addEventListener('click', restartGame);
+
     function main() {
       createBoard();
 
       document.getElementById('startButton').addEventListener('click', () => {
         if (!gameRunning) {
-          gameRunning = true;
+          restartGame();
           document.getElementById('startButton').style.display = 'none';
-          drawSnake();
-          drawFood();
-          document.addEventListener('keydown', handleKeyPress);
-          document.addEventListener('touchstart', handleTouchStart);
 
-          // Start background music
-          backgroundMusic.play();
-
+          // Game loop
           setInterval(() => {
             moveSnake();
             updateBoard();
@@ -305,3 +365,4 @@
 </body>
 
 </html>
+
