@@ -13,6 +13,7 @@
       margin: 0;
       background-color: #111;
       color: white;
+      transition: background-color 1s ease; /* Smooth background transition */
     }
 
     #game-board {
@@ -214,18 +215,12 @@
     }
 
     function animateRainbow() {
-      // Apply rainbow animation to the entire snake
-      snake.forEach((segment, index) => {
-        const snakeSegment = document.getElementById(`cell-${segment.x}-${segment.y}`);
-        snakeSegment.style.animation = 'rainbowAnimation 1s linear';
-      });
+      // Apply rainbow animation to the entire background
+      document.body.style.animation = 'rainbowAnimation 1s linear';
 
       // Revert to natural color after the specified duration
       setTimeout(() => {
-        snake.forEach(segment => {
-          const snakeSegment = document.getElementById(`cell-${segment.x}-${segment.y}`);
-          snakeSegment.style.animation = ''; // Reset animation
-        });
+        document.body.style.animation = ''; // Reset animation
       }, 1000);
     }
 
