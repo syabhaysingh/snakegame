@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,16 +54,37 @@
     }
 
     @keyframes rainbowAnimation {
-      0% { background-color: red; }
-      16.67% { background-color: orange; }
-      33.33% { background-color: yellow; }
-      50% { background-color: green; }
-      66.67% { background-color: blue; }
-      83.33% { background-color: indigo; }
-      100% { background-color: violet; }
+      0% {
+        background-color: red;
+      }
+
+      16.67% {
+        background-color: orange;
+      }
+
+      33.33% {
+        background-color: yellow;
+      }
+
+      50% {
+        background-color: green;
+      }
+
+      66.67% {
+        background-color: blue;
+      }
+
+      83.33% {
+        background-color: indigo;
+      }
+
+      100% {
+        background-color: violet;
+      }
     }
   </style>
 </head>
+
 <body>
   <button id="startButton">Start Game</button>
   <div id="score">Score: 0</div>
@@ -193,30 +215,45 @@
       const startX = touch.clientX;
       const startY = touch.clientY;
 
-      document.addEventListener('touchmove', function handleTouchMove(e) {
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - startX;
-        const deltaY = touch.clientY - startY;
+      // Check if the touch event occurred on the startButton
+      const startButton = document.getElementById('startButton');
+      const buttonRect = startButton.getBoundingClientRect();
 
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          // Horizontal swipe
-          if (deltaX > 0) {
-            direction = 'right';
-          } else {
-            direction = 'left';
-          }
-        } else {
-          // Vertical swipe
-          if (deltaY > 0) {
-            direction = 'down';
-          } else {
-            direction = 'up';
-          }
-        }
+      if (
+        touch.clientX >= buttonRect.left &&
+        touch.clientX <= buttonRect.right &&
+        touch.clientY >= buttonRect.top &&
+        touch.clientY <= buttonRect.bottom
+      ) {
+        // If the touch event is on the button, prevent default behavior
+        event.preventDefault();
+      } else {
+        // Otherwise, handle the swipe
+        document.addEventListener('touchmove', function handleTouchMove(e) {
+          const touch = e.touches[0];
+          const deltaX = touch.clientX - startX;
+          const deltaY = touch.clientY - startY;
 
-        // Remove the event listener after processing the swipe
-        document.removeEventListener('touchmove', handleTouchMove);
-      });
+          if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe
+            if (deltaX > 0) {
+              direction = 'right';
+            } else {
+              direction = 'left';
+            }
+          } else {
+            // Vertical swipe
+            if (deltaY > 0) {
+              direction = 'down';
+            } else {
+              direction = 'up';
+            }
+          }
+
+          // Remove the event listener after processing the swipe
+          document.removeEventListener('touchmove', handleTouchMove);
+        });
+      }
     }
 
     function animateRainbow() {
@@ -266,4 +303,5 @@
     main();
   </script>
 </body>
+
 </html>
